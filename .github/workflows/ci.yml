@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Prepare build tools (no inference)
-        run: python -m pip install build setuptools wheel
+        run: python -m pip install build 'setuptools>=77' wheel
       - name: Offline tests and packaging
         env:
           JEV_SEARCH_API_KEY: ''
