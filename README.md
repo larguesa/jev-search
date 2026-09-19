@@ -1,6 +1,32 @@
 # jev-search
 
-Experimental v0.1.0: bounded, line-by-line semantic search for small text files and logs. Original Python implementation, inspired by [uehaj/jev-semgrep](https://github.com/uehaj/jev-semgrep). It does not import or execute that project.
+**Find by meaning what keywords miss.** Complementary semantic search for agents exploring documents and knowledge bases alongside their existing search tools.
+
+Exact search finds names, symbols and literal references. `jev-search` adds another lens: whether a line expresses the intent you are looking for, even with different wording. The goal is richer retrieval, not replacing grep, repository navigation or your second brain.
+
+### An encouraging first signal
+
+In a small synthetic PT/EN experiment, Jev recovered **three distinct relevant line/intent pairs missed by a simple keyword baseline**, consistently across two runs per intent. It achieved **100% precision and recall** on that fixture, versus **40% precision and 66.7% recall** for the lexical baseline. Six requests cost **USD 0.000655704**, with **0.556 s median HTTP latency**.
+
+The useful signal is the additional relevant material, not a claim that one search method should replace another. These are author-reported results from 20 invented lines, not a repository or knowledge-vault benchmark. See [experiment details and limitations](#small-synthetic-experiment-not-an-accuracy-claim).
+
+### Where complementary search can help
+
+- **Repository documentation:** look for design intentions and trade-offs expressed without the expected keywords, then inspect the actual source and callers with your usual tools.
+- **LLM Wiki and second brains:** explore selected Markdown notes for related ideas phrased differently, then follow links and read the original sources.
+- **Obsidian workflows:** add a semantic pass over selected, nonprivate Markdown notes alongside existing CLI search, tags and links. No Obsidian plugin or CLI integration is included.
+
+Illustrative example, not a measured result: a query for *decisions that reduce vendor dependence* could surface a note saying *we adopted open formats to make migration easier*.
+
+Use filenames, indexes, tags, links and exact search to orient and select material; use semantic search to explore meaning; read surrounding context to verify findings. Do not restrict selection only to exact keyword hits, or semantic search cannot recover what that filter already excluded.
+
+### What ships today
+
+Experimental v0.1.0 is bounded, line-by-line search over small, explicitly selected text files and logs. It does **not** traverse folders or vaults, parse source-code structure, follow page links or understand a whole repository. Current limits are **8 files, 64 physical lines and 16 KiB combined**; see below. Source-code extensions are not supported. The scenarios above describe a complementary workflow and opportunities for future validation, not completed integrations.
+
+**Local dry-run by default.** Actual semantic evaluation requires `--send`, which uploads selected content to OpenRouter and TypeSafe. Review the privacy section before use; private vaults and confidential repositories are not appropriate inputs for this release.
+
+Original Python implementation, inspired by [uehaj/jev-semgrep](https://github.com/uehaj/jev-semgrep). It does not import or execute that project.
 
 Uses `typesafe/jev-1.13` through OpenRouter's [Decisions API](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-questions-and-answers-request.md), not chat completions or embeddings. No indexing, recursion, service, MCP or runtime dependencies.
 

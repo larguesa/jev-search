@@ -1,6 +1,32 @@
 # jev-search
 
-CLI experimental v0.1.0 para busca semântica por linha em pequenos arquivos de texto e logs. Implementação Python original, inspirada em [uehaj/jev-semgrep](https://github.com/uehaj/jev-semgrep), sem importar ou executar esse projeto.
+**Encontre pelo significado o que palavras-chave deixam passar.** Busca semântica complementar para agentes explorarem documentos e bases de conhecimento junto com suas ferramentas existentes.
+
+A busca exata encontra nomes, símbolos e referências literais. O `jev-search` acrescenta outra perspectiva: identificar se uma linha expressa a intenção procurada, mesmo usando outras palavras. O objetivo é enriquecer a recuperação de conhecimento, não substituir grep, navegação no repositório ou seu second brain.
+
+### Um primeiro sinal promissor
+
+Em um pequeno experimento sintético PT/EN, o Jev recuperou **três pares distintos de linha/intenção relevantes que uma busca simples por palavras-chave perdeu**, de forma consistente nas duas repetições por intenção. Nesse conjunto, atingiu **100% de precisão e recall**, contra **40% de precisão e 66,7% de recall** do baseline lexical. As seis requisições custaram **US$ 0,000655704**, com **latência HTTP mediana de 0,556 segundo**.
+
+O sinal útil é o conhecimento relevante adicional, não a ideia de substituir um método pelo outro. São resultados reportados pelo autor em 20 linhas inventadas, não um benchmark de repositórios ou bases de notas. Veja [detalhes e limitações do experimento](#experimento-sintético-pequeno).
+
+### Onde a busca complementar pode ajudar
+
+- **Documentação de repositórios:** procurar intenções de projeto e decisões descritas sem as palavras esperadas, depois inspecionar código e pontos de chamada com as ferramentas habituais.
+- **LLM Wiki e second brains:** explorar notas Markdown selecionadas em busca de ideias relacionadas expressas de outras formas, depois seguir links e consultar as fontes originais.
+- **Fluxos com Obsidian:** acrescentar uma consulta semântica em notas Markdown selecionadas e não privadas, junto da busca por CLI, tags e links existentes. Não inclui plugin nem integração com o CLI do Obsidian.
+
+Exemplo ilustrativo, não um resultado medido: a consulta *decisões que reduzem dependência de fornecedores* poderia encontrar uma nota dizendo *adotamos formatos abertos para facilitar a migração*.
+
+Use nomes de arquivos, índices, tags, links e busca exata para se orientar e selecionar material; explore significado com a busca semântica; leia o contexto para verificar os achados. Não selecione apenas resultados com coincidência literal, pois a busca semântica não recupera aquilo que esse filtro já excluiu.
+
+### O que está disponível hoje
+
+A v0.1.0 experimental pesquisa por linha em pequenos arquivos de texto e logs explicitamente selecionados. **Não percorre pastas ou vaults, interpreta estruturas de código, segue links entre páginas nem compreende um repositório inteiro.** Os limites atuais são **8 arquivos, 64 linhas físicas e 16 KiB no total**, detalhados abaixo. Extensões de código-fonte não são suportadas. Os cenários acima descrevem um fluxo complementar e oportunidades de validação futura, não integrações prontas.
+
+**Simulação local por padrão.** A avaliação semântica real exige `--send`, que envia o conteúdo selecionado à OpenRouter e à TypeSafe. Leia a seção de privacidade antes de usar; vaults privados e repositórios confidenciais não são entradas apropriadas para esta versão.
+
+Implementação Python original, inspirada em [uehaj/jev-semgrep](https://github.com/uehaj/jev-semgrep), sem importar ou executar esse projeto.
 
 Usa `typesafe/jev-1.13` na API Decisions do OpenRouter, não chat ou embeddings. Sem indexação, recursão, serviço, MCP ou dependências de execução.
 
