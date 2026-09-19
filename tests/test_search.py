@@ -15,11 +15,25 @@ class Tests(unittest.TestCase):
             for raw in [b'a\x00b', b'\xff', b'x'*16385, b'a\n'*65, b'OPENROUTER_API_KEY=example', b'-----BEGIN PRIVATE KEY-----']:
                 p.write_bytes(raw)
                 with self.subTest(raw=raw[:20]), self.assertRaises(ValueError): j.load_files([str(p)])
-            p.write_text('safe'); link=pathlib.Path(d)/'link.txt'; link.symlink_to(p)
-            for names in [[str(link)], [d], [str(p),str(p)]]:
+            p.write_text('safe')
+            for names in [[d], [str(p),str(p)]]:
                 with self.assertRaises(ValueError): j.load_files(names)
             secret=pathlib.Path(d)/'.env.txt'; secret.write_text('safe')
             with self.assertRaises(ValueError): j.load_files([str(secret)])
+
+    def test_symlink_rejected(self):
+        import os, jev_search as j
+        with tempfile.TemporaryDirectory() as d:
+            p=pathlib.Path(d)/'data.txt'; p.write_text('safe')
+            link=pathlib.Path(d)/'link.txt'
+            try:
+                link.symlink_to(p)
+            except OSError as e:
+                if os.name == 'nt' and e.winerror == 1314:
+                    self.skipTest('Windows symlink privilege unavailable; junction tested separately')
+                raise
+            with self.assertRaisesRegex(ValueError, 'symlink'):
+                j.load_files([str(link)])
 
     def test_decisions_contract(self):
         import jev_search as j, copy

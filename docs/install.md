@@ -2,7 +2,7 @@
 
 ## Requirements and direct installation
 
-Use **Linux, Python 3.11+, Git and uv or pipx** in the environment where commands will execute. The agent itself must already be installed, authenticated and permitted to use a shell. Model-provider authentication for the agent is separate from the inference key used by `jev-search`.
+Use **Linux or Windows, Python 3.11+, Git and uv or pipx** for the v0.2.0 source checkout. Tag `v0.1.1` remains Linux-only. Use `python` on Windows and local regular files in trusted directories, not network paths, reparse points or alternate streams. The agent itself must already be installed, authenticated and permitted to use a shell. Model-provider authentication for the agent is separate from the inference key used by `jev-search`.
 
 **The v0.2.0 code is available on `main`, without a published v0.2.0 tag/release.** Obtain a checkout with `git clone --branch main https://github.com/larguesa/jev-search.git`, review it and record `git rev-parse HEAD`. Install both components from that same reviewed local checkout; do not silently follow later changes to `main`:
 

@@ -68,11 +68,26 @@ def load_files(paths):
         p=Path(os.path.abspath(name))
         if p.suffix.lower() not in {'.txt','.md','.csv','.jsonl','.log'} or any(x.startswith('.') or re.search(r'(?i)(secret|credential|password|id_rsa)',x) for x in p.parts):
             raise ValueError('disallowed filename')
+        if os.name == 'nt' and (p.drive.startswith('\\\\') or any(
+            ':' in x or x.endswith((' ', '.')) or re.match(r'(?i)^(CON|PRN|AUX|NUL|COM[1-9¹²³]|LPT[1-9¹²³])(?:\.|$)', x)
+            for x in p.parts[1:]
+        )): raise ValueError('disallowed filename')
         if any(x.is_symlink() for x in [p,*p.parents]): raise ValueError('symlink rejected')
         try:
-            fd=os.open(p,os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK)
+            if os.name == 'nt':
+                # ponytail: trusted local directories only; hostile mutation needs handle-relative traversal.
+                if any(x.lstat().st_file_attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT for x in [p,*p.parents]):
+                    raise ValueError('reparse point rejected')
+                before=p.stat()
+                if not stat.S_ISREG(before.st_mode): raise ValueError('nonregular file')
+                flags=os.O_RDONLY|os.O_BINARY
+            else:
+                flags=os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK
+            fd=os.open(p,flags)
             with os.fdopen(fd,'rb') as f:
                 st=os.fstat(f.fileno()); ident=(st.st_dev,st.st_ino)
+                if os.name == 'nt' and (ident != (before.st_dev,before.st_ino) or st.st_file_attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT):
+                    raise ValueError('file changed or reparse point rejected')
                 if not stat.S_ISREG(st.st_mode) or ident in seen: raise ValueError('nonregular or duplicate file')
                 seen.add(ident); raw=f.read(16385)
         except OSError as e: raise ValueError('cannot safely read file') from e

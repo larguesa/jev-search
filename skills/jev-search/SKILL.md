@@ -3,7 +3,7 @@ name: jev-search
 description: Use for semantic search alongside lexical search.
 version: 0.2.0
 author: Ricardo Pupo Larguesa (larguesa), Hermes Agent
-platforms: [linux]
+platforms: [linux, windows]
 license: MIT
 ---
 
@@ -17,7 +17,7 @@ not replaces it. No recursive scan, index, MCP server or native vault connector.
 
 ## Install CLI and skill
 
-Use Linux and Python 3.11+ with Git and uv or pipx. Review the source and
+Use Linux or Windows and Python 3.11+ with Git and uv or pipx. Review the source and
 [installation guide](https://github.com/larguesa/jev-search/blob/main/docs/install.md)
 at the chosen revision before installation. v0.2.0 is not yet published: use a
 reviewed local v0.2.0 checkout, or verify publication before selecting its tag.

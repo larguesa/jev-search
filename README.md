@@ -22,7 +22,9 @@ Read the **[test and benchmark report](tests/REPORT.md)** for both the synthetic
 
 ## Install
 
-**Linux, Python 3.11+, Git and either [uv](https://docs.astral.sh/uv/) or [pipx](https://pipx.pypa.io/).** Windows and macOS are not supported/tested. The installed CLI uses only the Python standard library; installation may download build tools.
+**Linux or Windows, Python 3.11+, Git and either [uv](https://docs.astral.sh/uv/) or [pipx](https://pipx.pypa.io/).** macOS is not supported/tested. The installed CLI uses only the Python standard library; installation may download build tools.
+
+Windows support is included in the v0.2.0 source checkout; tag `v0.1.1` remains Linux-only. From this reviewed checkout, install with `uv tool install .`. Use `python` instead of `python3` on Windows. Only local regular files in trusted directories are supported: UNC/device paths, alternate data streams, reserved device names and reparse points (including junctions and cloud placeholders) are rejected. These checks do not protect against hostile concurrent filesystem mutation. Do not remove these restrictions to make a path work; select a reviewed local copy instead.
 
 ### Install v0.2.0
 

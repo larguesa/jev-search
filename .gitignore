@@ -13,6 +13,7 @@
 !/tests/benchmark.py
 !/tests/test_search.py
 !/tests/test_release.py
+!/tests/test_windows.py
 !/tests/test_evolution.py
 !/tests/REPORT.md
 !/tests/fixtures/
