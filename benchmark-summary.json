@@ -1,0 +1,29 @@
+{
+  "requests": 6,
+  "lines": 20,
+  "intents": 3,
+  "repetitions": 2,
+  "threshold": 0.5,
+  "cost_usd": 0.000655704,
+  "latency_seconds": {
+    "mean": 0.5710478212373952,
+    "median": 0.5561357871629298,
+    "min": 0.476987024769187,
+    "max": 0.718915082514286
+  },
+  "semantic": {
+    "tp": 18,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0
+  },
+  "lexical": {
+    "tp": 12,
+    "fp": 18,
+    "fn": 6,
+    "precision": 0.4,
+    "recall": 0.6666666666666666
+  },
+  "repeat_max_probability_delta": 0.010000000000000009
+}

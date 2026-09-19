@@ -1,0 +1,5 @@
+# Explicit source distribution allowlist. Never include local evidence.
+global-exclude *
+include pyproject.toml MANIFEST.in LICENSE README.md README.pt-BR.md
+include jev_search.py benchmark.py test_search.py test_release.py
+include synthetic.txt intents.json benchmark-summary.json

@@ -1,0 +1,5 @@
+[
+  {"name":"payment_failure","query":"A customer reports being unable to complete a purchase because checkout or payment fails.","positive_lines":[1,2,14],"lexical_terms":["checkout","payment","pagar","compra"]},
+  {"name":"locked_account","query":"A customer cannot sign in because their account is locked or blocked.","positive_lines":[4,5,15],"lexical_terms":["login","log in","locked","bloqueada","conta"]},
+  {"name":"refund_request","query":"A customer requests their money back for a duplicate charge.","positive_lines":[7,8,13],"lexical_terms":["refund","dinheiro","charge","cobrança"]}
+]

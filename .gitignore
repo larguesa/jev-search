@@ -1,0 +1,32 @@
+# Deny by default. New public files must be deliberately allowlisted.
+/*
+!/.gitignore
+!/pyproject.toml
+!/MANIFEST.in
+!/LICENSE
+!/README.md
+!/README.pt-BR.md
+!/jev_search.py
+!/benchmark.py
+!/test_search.py
+!/test_release.py
+!/synthetic.txt
+!/intents.json
+!/benchmark-summary.json
+!/.github/
+/.github/*
+!/.github/workflows/
+/.github/workflows/*
+!/.github/workflows/ci.yml
+
+# Private originals, credentials and local/generated artifacts remain local.
+**/AGENTS.md
+**/.env*
+**/__pycache__/
+**/*.pyc
+/evidence/
+/docs/
+/private-release-backup/
+/build/
+/dist/
+/*.egg-info/
