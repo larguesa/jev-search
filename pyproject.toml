@@ -15,6 +15,7 @@ dependencies = []
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Operating System :: POSIX :: Linux",
+  "Operating System :: Microsoft :: Windows",
   "Programming Language :: Python :: 3",
 ]
 

@@ -4,6 +4,6 @@ include pyproject.toml MANIFEST.in LICENSE README.md
 include jev_search.py
 include docs/install.md tests/REPORT.md
 include tests/__init__.py tests/__main__.py tests/benchmark.py
-include tests/test_search.py tests/test_release.py
+include tests/test_search.py tests/test_release.py tests/test_windows.py
 include tests/fixtures/synthetic.txt tests/fixtures/intents.json
 include tests/fixtures/benchmark-summary.json

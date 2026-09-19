@@ -2,7 +2,7 @@
 
 ## Requirements and direct installation
 
-Use **Linux, Python 3.11+, Git and uv or pipx** in the environment where commands will execute. The agent itself must already be installed, authenticated and permitted to use a shell. Model-provider authentication for the agent is separate from the inference key used by `jev-search`.
+Use **Linux, Python 3.11+, Git and uv or pipx** for the published tag below. The unreleased source branch also supports Windows via `uv tool install .` from a reviewed checkout; `v0.1.1` does not include that change. Use `python` on Windows and local regular files in trusted directories, not network paths, reparse points or alternate streams. The agent itself must already be installed, authenticated and permitted to use a shell. Model-provider authentication for the agent is separate from the inference key used by `jev-search`.
 
 ```sh
 uv tool install 'git+https://github.com/larguesa/jev-search.git@v0.1.1'
