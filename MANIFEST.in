@@ -2,8 +2,9 @@
 global-exclude *
 include pyproject.toml MANIFEST.in LICENSE README.md
 include jev_search.py
+include skills/jev-search/SKILL.md
 include docs/install.md tests/REPORT.md
 include tests/__init__.py tests/__main__.py tests/benchmark.py
-include tests/test_search.py tests/test_release.py tests/test_windows.py
+include tests/test_search.py tests/test_release.py tests/test_windows.py tests/test_evolution.py
 include tests/fixtures/synthetic.txt tests/fixtures/intents.json
 include tests/fixtures/benchmark-summary.json

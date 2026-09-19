@@ -12,6 +12,42 @@ import jev_search
 
 
 class ReleaseTests(unittest.TestCase):
+    def test_portable_skill_contract(self):
+        root = Path(__file__).resolve().parent.parent
+        path = root / 'skills' / 'jev-search' / 'SKILL.md'
+        self.assertTrue(path.is_file(), 'portable skill missing')
+        skill = path.read_text(encoding='utf8')
+        self.assertTrue(skill.startswith('---\nname: jev-search\n'))
+        self.assertIn('\n---\n', skill[4:])
+        for required in ['description:', 'lexical', 'JEV_SEARCH_API_KEY',
+                         'discovery directory', 'pinned checkout', '--dry-run',
+                         'Real search is the default', '1 to 8', '16,384',
+                         '64 physical lines', '2,048', '512', '60,000',
+                         '.txt', '.md', '.csv', '.jsonl', '.log']:
+            with self.subTest(required=required):
+                self.assertIn(required, skill)
+
+    def test_portable_skill_source_package_contract(self):
+        import tomllib
+        root = Path(__file__).resolve().parent.parent
+        skill = 'skills/jev-search/SKILL.md'
+        manifest = (root / 'MANIFEST.in').read_text(encoding='utf8').splitlines()
+        self.assertIn('include ' + skill, manifest)
+        metadata = tomllib.loads((root / 'pyproject.toml').read_text(encoding='utf8'))
+        self.assertEqual(metadata['tool']['setuptools']['py-modules'], ['jev_search'])
+        self.assertFalse(metadata['tool']['setuptools']['include-package-data'])
+        # Git-only policy is absent from the source archive by design.
+        if (root / '.gitignore').is_file():
+            ignores = (root / '.gitignore').read_text(encoding='utf8').splitlines()
+            for entry in ['!/skills/', '/skills/*', '!/skills/jev-search/',
+                          '/skills/jev-search/*', '!/' + skill]:
+                self.assertIn(entry, ignores)
+        for document in ['README.md', 'docs/install.md']:
+            text = (root / document).read_text(encoding='utf8')
+            self.assertIn(skill, text)
+            self.assertIn('pinned checkout', text)
+            self.assertIn('does not automatically install', text)
+
     def test_public_test_layout(self):
         import importlib.util
         root = Path(__file__).resolve().parent
@@ -54,12 +90,13 @@ class ReleaseTests(unittest.TestCase):
                 self.assertEqual(send.call_count, 6)
 
     def test_benchmark_cli_defaults_to_offline(self):
-        with patch('jev_search.send_request') as send, patch('sys.argv', ['benchmark.py']), contextlib.redirect_stdout(io.StringIO()) as stream:
-            self.assertEqual(benchmark.main(), 0)
-            data = json.loads(stream.getvalue())
-            self.assertEqual(data['mode'], 'dry-run')
-            self.assertEqual(data['requests'], 6)
-            send.assert_not_called()
+        for flags in [[], ['--dry-run']]:
+            with patch('jev_search.send_request') as send, patch('sys.argv', ['benchmark.py', *flags]), contextlib.redirect_stdout(io.StringIO()) as stream:
+                self.assertEqual(benchmark.main(), 0)
+                data = json.loads(stream.getvalue())
+                self.assertEqual(data['mode'], 'dry-run')
+                self.assertEqual(data['requests'], 6)
+                send.assert_not_called()
 
 
 if __name__ == '__main__':
