@@ -44,7 +44,7 @@ class Tests(unittest.TestCase):
         self.assertTrue(hasattr(j,'send_request'),'HTTP implementation missing')
         with tempfile.TemporaryDirectory() as d:
             p=pathlib.Path(d)/'data.txt'; p.write_text('hello')
-            run=subprocess.run([sys.executable,'-m','jev_search','--query','greeting',str(p)],capture_output=True,text=True)
+            run=subprocess.run([sys.executable,'-m','jev_search','--dry-run','--query','greeting',str(p)],capture_output=True,text=True,env={})
             self.assertEqual(run.returncode,0,run.stderr)
             self.assertEqual(json.loads(run.stdout)['mode'],'dry-run')
             for args in [['--max-requests','1.5'],['--max-requests','2'],['--send']]:

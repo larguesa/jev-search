@@ -21,12 +21,12 @@ jobs:
         run: |
           python -m tests
           python -m unittest discover -v
-          python -m tests.benchmark
+          python -m tests.benchmark --dry-run
           python -m build --no-isolation
           python -m venv "$RUNNER_TEMP/jev-cli"
           "$RUNNER_TEMP/jev-cli/bin/pip" install --no-index --no-deps dist/*.whl
           cd "$RUNNER_TEMP"
-          "$RUNNER_TEMP/jev-cli/bin/python" -c 'import jev_search; from importlib.metadata import version, requires; assert version("jev-search") == "0.1.1"; assert not requires("jev-search")'
+          "$RUNNER_TEMP/jev-cli/bin/python" -c 'import jev_search; from importlib.metadata import version, requires; assert version("jev-search") == "0.2.0"; assert not requires("jev-search")'
           "$RUNNER_TEMP/jev-cli/bin/jev-search" --help
-          "$RUNNER_TEMP/jev-cli/bin/jev-search" --query greeting "$GITHUB_WORKSPACE/tests/fixtures/synthetic.txt" > dry-run.json
+          "$RUNNER_TEMP/jev-cli/bin/jev-search" --dry-run --query greeting "$GITHUB_WORKSPACE/tests/fixtures/synthetic.txt" > dry-run.json
           python -c 'import json; d=json.load(open("dry-run.json")); assert d["mode"] == "dry-run" and len(d["rows"]) == 20'

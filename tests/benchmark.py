@@ -62,7 +62,9 @@ def main():
     import os
     import sys
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--send', action='store_true', help='authorize six paid synthetic requests')
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--send', action='store_true', help='authorize six paid synthetic OpenRouter requests')
+    mode.add_argument('--dry-run', action='store_true', help='offline experiment description (also the default)')
     parser.add_argument('--output', type=Path, help='new directory for aggregate results')
     args = parser.parse_args()
     try:
