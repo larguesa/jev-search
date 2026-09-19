@@ -44,11 +44,11 @@ class Tests(unittest.TestCase):
         self.assertTrue(hasattr(j,'send_request'),'HTTP implementation missing')
         with tempfile.TemporaryDirectory() as d:
             p=pathlib.Path(d)/'data.txt'; p.write_text('hello')
-            run=subprocess.run([sys.executable,'jev_search.py','--query','greeting',str(p)],capture_output=True,text=True)
+            run=subprocess.run([sys.executable,'-m','jev_search','--query','greeting',str(p)],capture_output=True,text=True)
             self.assertEqual(run.returncode,0,run.stderr)
             self.assertEqual(json.loads(run.stdout)['mode'],'dry-run')
             for args in [['--max-requests','1.5'],['--max-requests','2'],['--send']]:
-                run=subprocess.run([sys.executable,'jev_search.py','--query','hello',str(p),*args],capture_output=True,text=True,env={})
+                run=subprocess.run([sys.executable,'-m','jev_search','--query','hello',str(p),*args],capture_output=True,text=True,env={})
                 self.assertNotEqual(run.returncode,0)
         from unittest.mock import patch
         import urllib.error
@@ -57,8 +57,8 @@ class Tests(unittest.TestCase):
             self.assertEqual(op.call_count,1)
 
     def test_benchmark_metrics(self):
-        self.assertIsNotNone(importlib.util.find_spec('benchmark'),'benchmark missing')
-        import benchmark as b
+        self.assertIsNotNone(importlib.util.find_spec('tests.benchmark'),'benchmark missing')
+        from tests import benchmark as b
         self.assertEqual(b.metrics({1,2},{2,3}),{'tp':1,'fp':1,'fn':1,'precision':0.5,'recall':0.5})
         self.assertEqual(b.metrics(set(),{1})['precision'],0)
         self.assertTrue(hasattr(b,'run'),'benchmark runner missing')

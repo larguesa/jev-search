@@ -7,11 +7,22 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-import benchmark
+from tests import benchmark
 import jev_search
 
 
 class ReleaseTests(unittest.TestCase):
+    def test_public_test_layout(self):
+        import importlib.util
+        root = Path(__file__).resolve().parent
+        if root.name == 'tests':
+            root = root.parent
+        self.assertTrue((root / 'tests' / '__init__.py').is_file())
+        self.assertIsNotNone(importlib.util.find_spec('tests.benchmark'))
+        for name in ['synthetic.txt', 'intents.json', 'benchmark-summary.json']:
+            self.assertTrue((root / 'tests' / 'fixtures' / name).is_file(), name)
+            self.assertFalse((root / name).exists(), name)
+
     def test_log_files_use_the_same_safety_checks(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'application.log'
@@ -22,7 +33,7 @@ class ReleaseTests(unittest.TestCase):
                 jev_search.load_files([str(path)])
 
     def test_benchmark_requires_fresh_output_and_keeps_only_aggregates(self):
-        rows = jev_search.load_files([str(Path(__file__).parent / 'synthetic.txt')])
+        rows = jev_search.load_files([str(Path(__file__).parent / 'fixtures' / 'synthetic.txt')])
         response = {
             'id': 'gen-synthetic-not-for-publication', 'model': jev_search.MODEL,
             'usage': {'cost': 0.001, 'input_tokens': 10, 'output_tokens': 1},

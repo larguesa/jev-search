@@ -17,11 +17,11 @@ def metrics(predicted, expected):
 
 def run(key, output=None):
     root = Path(__file__).resolve().parent
-    out = Path(output) if output is not None else root / 'evidence'
+    out = Path(output) if output is not None else root.parent / 'evidence'
     # Exclusive creation protects prior evidence, including interrupted runs.
     out.mkdir(parents=True, exist_ok=False)
-    rows = j.load_files([str(root / 'synthetic.txt')])
-    intents = json.loads((root / 'intents.json').read_text(encoding='utf8'))
+    rows = j.load_files([str(root / 'fixtures' / 'synthetic.txt')])
+    intents = json.loads((root / 'fixtures' / 'intents.json').read_text(encoding='utf8'))
     runs = []
     for repetition in range(2):
         for intent in intents:

@@ -1,106 +1,118 @@
 # jev-search
 
-**Find by meaning what keywords miss.** Complementary semantic search for agents exploring documents and knowledge bases alongside their existing search tools.
+**Find by meaning what keywords miss.** Complementary semantic search for agents exploring documents and knowledge bases alongside their existing tools.
 
-Exact search finds names, symbols and literal references. `jev-search` adds another lens: whether a line expresses the intent you are looking for, even with different wording. The goal is richer retrieval, not replacing grep, repository navigation or your second brain.
+Exact search finds names, symbols and literal references. `jev-search` adds another perspective: whether a line expresses the intent you are looking for, even with different wording. Keep both, then read the surrounding context.
 
-### An encouraging first signal
+## Why complementary search?
 
-In a small synthetic PT/EN experiment, Jev recovered **three distinct relevant line/intent pairs missed by a simple keyword baseline**, consistently across two runs per intent. It achieved **100% precision and recall** on that fixture, versus **40% precision and 66.7% recall** for the lexical baseline. Six requests cost **USD 0.000655704**, with **0.556 s median HTTP latency**.
+- **Repository documentation:** explore design intentions and trade-offs, then inspect the actual source with your usual tools.
+- **LLM Wiki and second brains:** find related ideas expressed differently in selected Markdown notes, then follow links and original sources.
+- **Obsidian and OpenViking workflows:** evaluate selected, nonprivate passages alongside existing search, tags and navigation. No native plugin or connector is included.
 
-The useful signal is the additional relevant material, not a claim that one search method should replace another. These are author-reported results from 20 invented lines, not a repository or knowledge-vault benchmark. See [experiment details and limitations](#small-synthetic-experiment-not-an-accuracy-claim).
+Illustrative example: a query for *decisions that reduce vendor dependence* could surface *we adopted open formats to make migration easier*. This example is not a measured result.
 
-### Where complementary search can help
+### Early evidence
 
-- **Repository documentation:** look for design intentions and trade-offs expressed without the expected keywords, then inspect the actual source and callers with your usual tools.
-- **LLM Wiki and second brains:** explore selected Markdown notes for related ideas phrased differently, then follow links and read the original sources.
-- **Obsidian workflows:** add a semantic pass over selected, nonprivate Markdown notes alongside existing CLI search, tags and links. No Obsidian plugin or CLI integration is included.
+In six simulated tasks over selected real technical text, combining a simple lexical search with Jev recovered **29 of 34 labeled relevant passages**, versus **22 of 34** for lexical search alone: **seven additional relevant text units, with no additional false positives**. Six requests cost **USD 0.000639114**, with **0.536 s median HTTP latency**.
 
-Illustrative example, not a measured result: a query for *decisions that reduce vendor dependence* could surface a note saying *we adopted open formats to make migration easier*.
+These are small, manually curated experiments, not a general accuracy claim. Several extra text units are adjacent to lexical hits and might already be found by reading their context. The union retained five lexical false positives and missed five relevant passages. **We have not demonstrated an advantage over lexical search plus context reading.**
 
-Use filenames, indexes, tags, links and exact search to orient and select material; use semantic search to explore meaning; read surrounding context to verify findings. Do not restrict selection only to exact keyword hits, or semantic search cannot recover what that filter already excluded.
+Read the **[test and benchmark report](tests/REPORT.md)** for both the synthetic pilot and real-text experiment, methods, omissions and limitations.
 
-### What ships today
+## Install
 
-Experimental v0.1.0 is bounded, line-by-line search over small, explicitly selected text files and logs. It does **not** traverse folders or vaults, parse source-code structure, follow page links or understand a whole repository. Current limits are **8 files, 64 physical lines and 16 KiB combined**; see below. Source-code extensions are not supported. The scenarios above describe a complementary workflow and opportunities for future validation, not completed integrations.
+**Linux, Python 3.11+, Git and either [uv](https://docs.astral.sh/uv/) or [pipx](https://pipx.pypa.io/).** Windows and macOS are not supported/tested. The installed CLI uses only the Python standard library; installation may download build tools.
 
-**Local dry-run by default.** Actual semantic evaluation requires `--send`, which uploads selected content to OpenRouter and TypeSafe. Review the privacy section before use; private vaults and confidential repositories are not appropriate inputs for this release.
-
-Original Python implementation, inspired by [uehaj/jev-semgrep](https://github.com/uehaj/jev-semgrep). It does not import or execute that project.
-
-Uses `typesafe/jev-1.13` through OpenRouter's [Decisions API](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-questions-and-answers-request.md), not chat completions or embeddings. No indexing, recursion, service, MCP or runtime dependencies.
-
-**Linux only, Python 3.11+.** Uses POSIX safe-open flags; Windows and macOS are not supported/tested. [Português](README.pt-BR.md).
-
-## Install from the Git tag
-
-Requires Git and either uv or pipx. This is a Git installation, not a PyPI release.
+### Install from the Git tag
 
 ```sh
-uv tool install 'git+https://github.com/larguesa/jev-search.git@v0.1.0'
+uv tool install 'git+https://github.com/larguesa/jev-search.git@v0.1.1'
 # Alternative:
-pipx install 'git+https://github.com/larguesa/jev-search.git@v0.1.0'
+pipx install 'git+https://github.com/larguesa/jev-search.git@v0.1.1'
 jev-search --help
 ```
 
-Installation may download build tools. The installed CLI uses only the Python standard library. The benchmark and example files are in the source checkout, not installed as commands.
+This is a Git installation, not a PyPI release. For an existing installation, use `uv tool install --force` with the same pinned URL. If the executable is not found, follow your tool manager's PATH instructions and open a new terminal.
 
-## Review locally, then explicitly send
+### Install through your agent
 
-```sh
-# Use a small, nonprivate UTF-8 file you have reviewed.
-jev-search --query 'A customer requests their money back for a duplicate charge.' sample.log
-```
+Use the **[agent installation guide](docs/install.md#install-through-an-agent)** for **Hermes, OpenClaw, OpenCode, Pi coding agent, ChatGPT/Codex and Claude Code**, plus other terminal-capable agents. It supplies a shared setup prompt and the commands that actually invoke each agent.
 
-Default **dry-run** does not access the network or read credentials. It prints JSON containing the selected lines and exact request payload. Review it before sending:
+The setup prompt tells the agent to install the pinned release, preserve existing instructions, register **complementary** use, configure a budget-limited OpenRouter inference key securely and verify a local dry-run. It does not authorize uploading a repository or spending money automatically.
 
-```sh
-# Set JEV_SEARCH_API_KEY securely to a budget-limited inference key.
-jev-search --send --max-requests 1 --query 'A customer requests their money back for a duplicate charge.' sample.log
-```
+### Configure the inference key
 
-Never supply a management key. Only `JEV_SEARCH_API_KEY` is read, only for `--send`; no `.env` loading or credential provisioning. Enforce spending limits on the key, not with this client. A send can incur charges even if the response fails validation or the connection fails.
+This version runs **TypeSafe Jev through OpenRouter**, using `typesafe/jev-1.13` on the [Decisions API](https://openrouter.ai/docs/api/api-reference/alphadecisions/submit-a-decisions-questions-and-answers-request.md). It does not use chat completions or embeddings.
 
-The send uploads **all selected nonblank lines and the query**, not just matches, to `https://openrouter.ai/api/alpha/decisions` and its model provider. File paths are not included in the request, but content can itself reveal paths or personal data. Secret-pattern checks are incomplete: human review is required. Do not use private files.
+Create a dedicated, spending-limited **OpenRouter inference key** and expose it as `JEV_SEARCH_API_KEY`. Do not use a management key or assume an agent's own provider login supplies this key. **A direct TypeSafe API key is not supported by this client and is not interchangeable with an OpenRouter key.**
 
-Output includes absolute local paths, original text and, after sending, provider response metadata including a generation ID. Treat output as private; do not commit or publish it. Each result includes a 1-based `line`, `probability` and `match` (`probability >= 0.5`). Nonmatches remain in order. The score is not established as a calibrated probability. JSON escapes non-ASCII/control characters. Shell redirection can overwrite an existing file.
+For secret-safe terminal entry, agent environment setup and provider details, see [key configuration](docs/install.md#configure-the-key-without-sharing-it-in-chat).
 
-## Bounds and failure behavior
-
-- 1 to 8 explicit `.txt`, `.md`, `.csv`, `.jsonl` or `.log` files. UTF-8 only; CSV/JSON are treated as lines, not parsed records.
-- Combined maximum: 16,384 bytes, 64 physical lines, 2,048 bytes per line, 512 bytes per query, serialized request at most 60,000 bytes. Blank lines are skipped but count toward the physical-line limit. Exceeding limits fails, never truncates silently.
-- Rejects hidden/suspicious path components, symlinks (including ancestors), duplicate inodes, nonregular files, common secret patterns and binary controls. Ancestor checks are not a sandbox against concurrent local directory changes.
-- One request per CLI invocation; no retries or redirects. 30-second socket timeout, not a total wall-clock deadline. Response limit 256 KiB. Errors return a nonzero exit status.
-- Validates model, response IDs, exact answer set, `noul` type, finite scores, cost and token counts. Requests only `typesafe`, with no fallbacks, `data_collection: deny`, maximum input price USD 0.042 per million tokens and output price zero. These are routing constraints, not a guarantee of privacy or a total spending cap.
-- The API is alpha. Model availability, response format and prices can change; incompatible responses fail rather than silently relaxing constraints.
-
-## Small synthetic experiment, not an accuracy claim
-
-The fixed `synthetic.txt` has 20 invented PT/EN lines; `intents.json` has 3 intents with labels and lexical terms fixed before the pilot. Each intent was sent twice: 6 requests, 60 unique line/intent pairs, 120 decisions. The threshold was 0.5. Cases include paraphrases, negation, historical/resolved issues and one adversarial instruction.
-
-| Method | Micro precision | Micro recall | TP / FP / FN |
-|---|---:|---:|---:|
-| Jev | 1.00 | 1.00 | 18 / 0 / 0 |
-| Lexical OR substring baseline | 0.40 | 0.667 | 12 / 18 / 6 |
-
-The completed pilot reported USD **0.000655704** total cost and **0.556 s** median HTTP latency. [Aggregate metrics](benchmark-summary.json) omit generation IDs, account metadata, paths and raw responses. The raw pilot evidence is not published; these aggregates are author-reported, not independently reproducible without a new paid run. No live inference runs in CI.
-
-This tiny synthetic smoke experiment does **not** establish production accuracy, calibrated confidence, injection resistance, multilingual quality or superiority to BM25, embeddings or stronger rules. Repetitions are not independent samples. Lines share one request state and may influence each other.
+## Use
 
 ```sh
-git clone --branch v0.1.0 https://github.com/larguesa/jev-search.git
-cd jev-search
-python3 -m unittest -v
-python3 jev_search.py --query 'refund request' synthetic.txt
-python3 benchmark.py  # offline design summary, no API calls
-# Optional, paid: review the fixtures and configure a limited key first.
-python3 benchmark.py --send --output benchmark-run-01
+# A small, nonprivate UTF-8 file you have reviewed.
+jev-search --query 'A customer requests money back for a duplicate charge.' sample.log
 ```
 
-The optional benchmark makes up to six requests, writes aggregate metrics only, and requires a new output directory. Existing directories are never overwritten; a failure leaves the directory reserved. It stops after reported cumulative cost exceeds USD 0.09, but that is an after-the-fact check, not a budget guarantee. Never rerun with the old pilot key. Failed/partial runs do not produce a complete summary.
+Default **dry-run** does not access the network, read credentials or evaluate meaning. It prints JSON containing selected lines and the exact request payload. Review it before explicitly authorizing a paid request:
 
-## Development and license
+```sh
+jev-search --send --query 'A customer requests money back for a duplicate charge.' sample.log
+```
 
-Offline tests: `python3 -m unittest -v`. Build: `python3 -m build` (requires the `build` package). CI installs build tooling, then tests/builds and checks a fresh-venv CLI install without inference calls. Only `jev_search` is packaged as a runtime module; source archives use an explicit allowlist.
+Only `JEV_SEARCH_API_KEY` is read, only with `--send`. The CLI does not load `.env`, provision keys or enforce a total monetary budget. Set spending limits on the key. A failed connection or rejected response may still incur a charge.
 
-MIT, copyright Ricardo Pupo Larguesa. See [LICENSE](LICENSE).
+### How an agent should use it
+
+Orient using filenames, indexes, tags, links and exact search. Select a bounded set of reviewed passages, apply Jev as another retrieval pass, merge the candidates and read the original context before answering. Do not limit the entire candidate pool to literal keyword hits, or semantic search cannot recover excluded material.
+
+The tool evaluates **lines**, not an entire document, knowledge graph or codebase. If PDF line wrapping splits a statement, any passage reconstruction must preserve provenance and be documented separately; the CLI does not perform that preprocessing.
+
+## Privacy and output
+
+`--send` uploads **all selected nonblank lines and the query**, not just matches, to `https://openrouter.ai/api/alpha/decisions` and its model provider, TypeSafe. File paths are not included in the request, but content may itself reveal paths or personal data. Secret-pattern checks are incomplete. Human review is required; do not use private files, confidential repositories or private vaults.
+
+Output includes absolute local paths, original text and, after sending, provider metadata including a generation ID. **Treat output as private; do not commit or publish it.** Results include a 1-based `line`, `probability` and `match` (`probability >= 0.5`). Nonmatches remain in the original order. Scores are not established as calibrated probabilities. JSON escapes non-ASCII/control characters. Shell redirection can overwrite files.
+
+## Scope and limits
+
+Experimental **v0.1.1** keeps a small surface: no indexing, recursive traversal, service, MCP, source-code parsing or runtime dependencies.
+
+- **Inputs:** 1 to 8 explicit `.txt`, `.md`, `.csv`, `.jsonl` or `.log` files. UTF-8 only; CSV/JSON are treated as lines, not parsed records.
+- **Bounds:** 16,384 bytes and 64 physical lines combined; 2,048 bytes per line; 512 bytes per query; serialized request at most 60,000 bytes. Blank lines count toward the physical limit but are skipped during evaluation. Exceeding limits fails, without silent truncation.
+- **Files:** rejects hidden/suspicious path components, symlinks including ancestors, duplicate inodes, nonregular files, common secret patterns and binary controls. Checks are not a sandbox against concurrent local directory changes.
+- **Network:** one request per invocation; no retries or redirects. Socket timeout 30 seconds, not a total deadline. Response limit 256 KiB. Errors return nonzero status.
+- **Validation:** checks model, response IDs, exact answer set, `noul` type, finite scores, cost and token counts.
+- **Routing:** only `typesafe`, no fallbacks, `data_collection: deny`, maximum input price USD 0.042 per million tokens and output price zero. Routing constraints are not a privacy guarantee or total spending cap.
+- **API stability:** the Decisions API is alpha. Availability, format and prices can change; incompatible responses fail rather than silently relaxing constraints.
+
+## Repository layout
+
+```text
+jev_search.py        CLI implementation
+pyproject.toml       Package metadata and console entry point
+MANIFEST.in          Explicit source-distribution allowlist
+docs/                Installation and agent setup guide
+tests/               Offline tests, benchmark runner, fixtures and report
+.github/workflows/   Offline CI checks
+```
+
+The root also contains this README, the license and Git ignore rules. Only `jev_search` is installed as a runtime module.
+
+## Development
+
+From a source checkout:
+
+```sh
+python3 -m tests  # offline discovery; fails if no tests are found
+python3 -m tests.benchmark  # offline experiment description, no inference
+python3 jev_search.py --query 'refund request' tests/fixtures/synthetic.txt
+```
+
+Build with `python3 -m build` after installing the `build` package. CI runs offline tests, builds distributions and checks an isolated CLI installation without inference. See [tests/REPORT.md](tests/REPORT.md) for optional paid benchmark reproduction and its budget safeguards.
+
+## Credits and license
+
+Original Python implementation inspired by [uehaj/jev-semgrep](https://github.com/uehaj/jev-semgrep), without importing or executing that project. MIT; see [LICENSE](LICENSE).
