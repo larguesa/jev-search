@@ -6,7 +6,7 @@
 !/MANIFEST.in
 !/LICENSE
 !/README.md
-!/agents.md
+
 !/jev_search.py
 !/tests/
 /tests/*
@@ -45,6 +45,7 @@
 
 # Private originals, credentials and local/generated artifacts remain local.
 **/AGENTS.md
+!/AGENTS.md
 **/.env*
 **/__pycache__/
 **/*.pyc
