@@ -8,3 +8,5 @@ include tests/__init__.py tests/__main__.py tests/benchmark.py
 include tests/test_search.py tests/test_release.py tests/test_windows.py tests/test_evolution.py
 include tests/fixtures/synthetic.txt tests/fixtures/intents.json
 include tests/fixtures/benchmark-summary.json
+include tests/test_ranking.py tests/ranking_benchmark.py tests/RANKING_REPORT.md tests/RANKING_DEPTH_REPORT.md
+include tests/fixtures/ranking.json tests/fixtures/ranking-results.json

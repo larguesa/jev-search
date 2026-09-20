@@ -108,6 +108,30 @@ class EvolutionTests(unittest.TestCase):
         self.assertEqual(json.loads(out)['mode'], 'sent')
         self.assertEqual(transport.call_count, 1)
 
+    def test_transport_allows_slow_inference(self):
+        status, out, err, transport = self.invoke(env={'JEV_SEARCH_API_KEY': 'synthetic-key'})
+        self.assertEqual(status, 0, err)
+        self.assertEqual(transport.call_args.kwargs['timeout'], 300)
+        self.assertEqual(transport.call_count, 1)
+
+    def test_transport_diagnostic_types_do_not_expose_exception_text(self):
+        import urllib.error
+        import ssl
+        for failure, kind in [(TimeoutError('sensitive'), 'TimeoutError'),
+                              (urllib.error.URLError(TimeoutError('sensitive')), 'TimeoutError'),
+                              (ssl.SSLError('sensitive'), 'SSLError')]:
+            for on_read in (False, True):
+                response = MagicMock()
+                response.__enter__.return_value.read.side_effect = failure
+                with patch('urllib.request.OpenerDirector.open', return_value=response,
+                           side_effect=None if on_read else failure) as transport:
+                    with self.assertRaises(ValueError) as caught:
+                        j.send_request({}, 'synthetic-key')
+                    self.assertIn(kind, str(caught.exception))
+                    self.assertNotIn('sensitive', str(caught.exception))
+                    self.assertNotIn('synthetic-key', str(caught.exception))
+                    self.assertEqual(transport.call_count, 1)
+
     def test_transport_errors_are_safe_and_not_retried(self):
         import urllib.error
         import http.client

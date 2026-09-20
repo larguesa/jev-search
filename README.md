@@ -88,6 +88,27 @@ jev-search --provider typesafe --model jev-1.13.0 --query 'refund request' sampl
 
 `--send` remains only as a backward-compatible explicit real-search flag; it is no longer needed. Only `JEV_SEARCH_API_KEY` supplies the inference credential, and it is read only for real search. The CLI does not load `.env`, provision keys or enforce a total monetary budget. `--max-requests 1` bounds requests, not money. Set provider-side spending limits. A failed connection or rejected response may still incur a charge.
 
+### Optional ranking
+
+Use `--rank`, or `--top-k 1..64` which implies ranking.
+`ranked_results` contains matches sorted by descending existing score, with stable
+input-order ties. All original `results` remain unchanged; top-k limits only the
+additional view. No extra inference request is made. The full JSON is larger, not
+an automatic token saving.
+
+Dry-runs and errors identify `unjudged.candidates` as `l0`, `l1`, etc., aligned with
+the nonblank input rows. A null candidate list means loading did not complete.
+Errors still exit nonzero; no partial scores are salvaged. There is no answerability
+score or security guarantee. An empty match list suggests reviewing the query and
+candidate pool, not that the answer is absent everywhere.
+
+The initial [six-task comparison](tests/RANKING_REPORT.md) produced six ties.
+A [deeper amended study](tests/RANKING_DEPTH_REPORT.md) completed two repetitions
+of twelve tasks and improved evidence-facet coverage from 49.31% to 69.44% at k=3
+in natural candidate order. A shuffled-order baseline beat ranking. This is
+exploratory, with disclosed transport recovery, not general superiority or
+answer-quality proof. Ranking stays opt-in; default complete results are preserved.
+
 ### How an agent should use it
 
 Orient using filenames, indexes, tags, links and exact search. Select a bounded set of reviewed passages, apply Jev as another retrieval pass, merge the candidates and read the original context before answering. Do not limit the entire candidate pool to literal keyword hits, or semantic search cannot recover excluded material.
@@ -111,7 +132,7 @@ Output includes absolute local paths, original text and, after sending, provider
 - **Inputs:** 1 to 8 explicit `.txt`, `.md`, `.csv`, `.jsonl` or `.log` files. UTF-8 only; CSV/JSON are treated as lines, not parsed records.
 - **Bounds:** 16,384 bytes and 64 physical lines combined; 2,048 bytes per line; 512 bytes per query; serialized request at most 60,000 bytes. Blank lines count toward the physical limit but are skipped during evaluation. Exceeding limits fails, without silent truncation.
 - **Files:** rejects hidden/suspicious path components, symlinks including ancestors, duplicate inodes, nonregular files, common secret patterns and binary controls. Checks are not a sandbox against concurrent local directory changes.
-- **Network:** one request per invocation; no retries or redirects. Socket timeout 30 seconds, not a total deadline. Response limit 256 KiB. Errors return nonzero status.
+- **Network:** one request per invocation; no retries or redirects. Socket timeout 300 seconds, not a total deadline. Response limit 256 KiB. Errors return nonzero status; network diagnostics expose exception types, never raw exception messages.
 - **Validation:** checks the selected model, exact answer set, `noul` type, finite scores and token counts; OpenRouter also requires generation ID and cost. Direct TypeSafe cost is not fabricated when absent.
 - **OpenRouter routing:** only `typesafe`, no fallbacks, `data_collection: deny`. These OpenRouter-specific fields are not sent to direct TypeSafe. Routing constraints are not a privacy guarantee or total spending cap; use provider-side budget controls and check current pricing.
 - **API stability:** OpenRouter's Decisions API is alpha. Availability, model names, formats and prices can change on either backend; incompatible responses fail rather than silently relaxing constraints.

@@ -1,0 +1,74 @@
+{
+  "experiment": "ranking-synthetic-v1",
+  "design": {
+    "provider": "openrouter", "model": "typesafe/jev-1.13", "requests": 6,
+    "repetitions": 1, "k": 2, "threshold": 0.5,
+    "comparison": "Paired replay: one live response per task; filter match >=0.5 for both arms; baseline input order vs stable descending score. No extra ranking calls.",
+    "labels": "Author-defined before inference. 0 unrelated or contradicts requested facts; 1 relevant but incomplete; 2 independently supplies every requested fact. Each task is fictional, public synthetic text. No external truth claim.",
+    "metrics": "Macro precision@k (TP/k, empty slots count zero), candidate-pool recall (TP/all grade>=1), graded nDCG@k using gain 2^grade-1, answer-complete precision@k (grade2/k). Empty gold recall and nDCG are zero. Report per-task outcomes without exclusions.",
+    "sufficiency_probe": "Unsafe hypothetical heuristic only, not CLI output: any selected match implies answer sufficient. False-sufficient if selected nonempty but no selected grade2; false-insufficient if empty despite grade2 anywhere in pool. No generated answers or calibrated sufficiency predictions.",
+    "acceptance": "Ranking passes exploratory gate only if macro nDCG@2 strictly improves, macro relevance precision@2 does not fall, and false-sufficient count does not increase. No significance or generalization claim. Do not change labels, order, query, k, threshold, metric or gate after inference. All six attempts included; any request failure makes study incomplete, no retries."
+  },
+  "tasks": [
+    {"id": "refund-details", "query": "What deadline and submission method does the fictional Cedar Museum specify for ticket refunds?", "candidates": [
+      {"text": "Cedar Museum accepts ticket refund requests before the visit.", "grade": 1},
+      {"text": "Cedar Museum ticket refunds have a submission deadline.", "grade": 1},
+      {"text": "Cedar Museum ticket refund requests must arrive at least 48 hours before the visit, using the refund form on its website.", "grade": 2},
+      {"text": "To obtain a Cedar Museum ticket refund, submit the website refund form no later than two days before your visit.", "grade": 2},
+      {"text": "Pine Museum refunds require a phone call one week ahead.", "grade": 0},
+      {"text": "Cedar Museum has a gift shop near its entrance.", "grade": 0},
+      {"text": "Cedar Museum does not specify parking discounts.", "grade": 0},
+      {"text": "Cedar Museum visitors can request ticket refunds online.", "grade": 1}
+    ]},
+    {"id": "maintenance-window", "query": "When does the fictional Atlas service maintenance start, and how long will it last?", "candidates": [
+      {"text": "Atlas has announced a scheduled maintenance window.", "grade": 1},
+      {"text": "Atlas maintenance will temporarily interrupt access.", "grade": 1},
+      {"text": "The Atlas maintenance window begins Tuesday at 02:00 UTC and lasts 30 minutes.", "grade": 2},
+      {"text": "Atlas starts maintenance at 02:00 UTC on Tuesday and restores service at 02:30 UTC that day.", "grade": 2},
+      {"text": "Atlas maintenance begins Tuesday at 02:00 UTC.", "grade": 1},
+      {"text": "Boreal maintenance lasts four hours on Friday.", "grade": 0},
+      {"text": "Atlas offers a blue display theme.", "grade": 0},
+      {"text": "Atlas has not scheduled any maintenance window.", "grade": 0}
+    ]},
+    {"id": "loan-rules", "query": "How many books may a fictional Lumen Library member borrow, and for how many days?", "candidates": [
+      {"text": "Lumen Library members may borrow books under its lending policy.", "grade": 1},
+      {"text": "Lumen Library limits the number of borrowed books.", "grade": 1},
+      {"text": "Lumen Library lends up to six books to each member for 21 days.", "grade": 2},
+      {"text": "Members of Lumen Library can check out six books at once, with each loan lasting three weeks.", "grade": 2},
+      {"text": "Lumen Library book loans last 21 days.", "grade": 1},
+      {"text": "Lumen Library closes on public holidays.", "grade": 0},
+      {"text": "Orchid Library allows two books for ten days.", "grade": 0},
+      {"text": "Lumen Library has no book lending service.", "grade": 0}
+    ]},
+    {"id": "shuttle-control", "query": "Where does the fictional Harbor shuttle depart, and how often does it run?", "candidates": [
+      {"text": "The Harbor shuttle departs from Gate C every 15 minutes.", "grade": 2},
+      {"text": "Every quarter hour, the Harbor shuttle leaves Gate C.", "grade": 2},
+      {"text": "The Harbor shuttle departs from Gate C.", "grade": 1},
+      {"text": "The Harbor shuttle operates on a regular schedule.", "grade": 1},
+      {"text": "The Valley shuttle leaves Gate A every hour.", "grade": 0},
+      {"text": "Harbor airport sells postcards at Gate D.", "grade": 0},
+      {"text": "The Harbor shuttle runs every 15 minutes.", "grade": 1},
+      {"text": "There is no Harbor shuttle service.", "grade": 0}
+    ]},
+    {"id": "storage-control", "query": "What temperature and maximum duration are specified for storing the fictional Nacre paint?", "candidates": [
+      {"text": "Store Nacre paint at 10 to 20 degrees Celsius for no more than six months.", "grade": 2},
+      {"text": "Nacre paint storage must stay between 10 and 20 degrees Celsius and must not exceed six months.", "grade": 2},
+      {"text": "Nacre paint has temperature-controlled storage requirements.", "grade": 1},
+      {"text": "Nacre paint may be stored for up to six months.", "grade": 1},
+      {"text": "Nacre paint is available in green and blue.", "grade": 0},
+      {"text": "Opal paint may be frozen for two years.", "grade": 0},
+      {"text": "Store Nacre paint between 10 and 20 degrees Celsius.", "grade": 1},
+      {"text": "Nacre paint has no storage temperature or time limits.", "grade": 0}
+    ]},
+    {"id": "missing-answer", "query": "What is the fictional Kestrel observatory admission price and opening time?", "candidates": [
+      {"text": "Kestrel observatory publishes visitor admission information.", "grade": 1},
+      {"text": "Kestrel observatory admission prices vary by visitor category.", "grade": 1},
+      {"text": "Kestrel observatory opening times are listed on a notice at its entrance.", "grade": 1},
+      {"text": "Kestrel observatory sells admission tickets at reception.", "grade": 1},
+      {"text": "The Falcon observatory opens at noon and charges ten coins.", "grade": 0},
+      {"text": "Kestrel observatory has a telescope with a large mirror.", "grade": 0},
+      {"text": "Kestrel observatory parking is behind the building.", "grade": 0},
+      {"text": "The town bakery opens at eight in the morning.", "grade": 0}
+    ]}
+  ]
+}

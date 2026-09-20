@@ -83,6 +83,19 @@ the maintainer lacks direct API access. Missing cost is unavailable, not free.
    has 1-based lines, original text, `probability` and `match` at threshold 0.5;
    scores are not established as calibrated for these tasks.
 
+## Optional ranking
+
+Use `--rank` or `--top-k 1..64` only when ordered or bounded selection is useful.
+All original `results` remain; `ranked_results` contains matches in stable
+score-descending order. The added view increases JSON size; it does not by itself
+save tokens. Verify installed help before using these flags.
+The small initial test tied; a deeper amended study found improved evidence
+coverage in natural order but regressions against a shuffled-order baseline.
+Keep ranking opt-in, not a sufficiency or diversity guarantee. See
+`tests/RANKING_DEPTH_REPORT.md` for aggregate results and transport-recovery limits.
+Dry-run/error `unjudged.candidates` map to nonblank row order; null means rows
+could not be loaded. Unjudged rows are not negative matches. No extra query runs.
+
 ## Pitfalls
 
 All selected nonblank lines and the query are uploaded, not just matches:

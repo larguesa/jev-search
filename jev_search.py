@@ -113,12 +113,14 @@ def send_request(payload, key, provider='openrouter'):
     request=urllib.request.Request(PROVIDERS[provider][0], data=json.dumps(payload).encode('utf8'), headers={'Authorization':'Bearer '+key,'Content-Type':'application/json','User-Agent':'jev-search-stdlib/1'},method='POST')
     start=time.perf_counter()
     try:
-        with urllib.request.build_opener(NoRedirect).open(request,timeout=30) as response:
+        with urllib.request.build_opener(NoRedirect).open(request,timeout=300) as response:
             raw=response.read(262145)
         if len(raw)>262144: raise ValueError('response exceeds 256KiB')
         return raw,time.perf_counter()-start
     except urllib.error.HTTPError as e: raise ValueError(f'HTTP {e.code}; not retried') from None
-    except (urllib.error.URLError,TimeoutError,OSError,http.client.HTTPException): raise ValueError('network failure; not retried; charge may have occurred') from None
+    except (urllib.error.URLError,TimeoutError,OSError,http.client.HTTPException) as e:
+        cause=e.reason if isinstance(e,urllib.error.URLError) and isinstance(e.reason,Exception) else e
+        raise ValueError(f'network failure ({type(cause).__name__}); not retried; charge may have occurred') from None
 
 
 def main():
@@ -134,21 +136,30 @@ def main():
     mode.add_argument('--dry-run',action='store_true',help='print request without reading credentials or using the network')
     parser.add_argument('--provider',choices=tuple(PROVIDERS),default=os.environ.get('JEV_SEARCH_PROVIDER','openrouter'))
     parser.add_argument('--model',default=os.environ.get('JEV_SEARCH_MODEL'))
+    parser.add_argument('--rank',action='store_true',help='add matching results sorted by descending score; preserve all original results')
+    parser.add_argument('--top-k',type=int,choices=range(1,65),metavar='1..64',help='limit ranked_results only; implies --rank')
     parser.add_argument('--max-requests',type=int,choices=[1],default=1)
     args=parser.parse_args()
+    rows=None
     try:
         rows=load_files(args.files); payload=build_request(rows,args.query,args.provider,args.model)
         if args.dry_run:
-            output={'mode':'dry-run','requests':1,'payload_bytes':len(json.dumps(payload).encode()),'rows':rows,'request':payload}
+            output={'mode':'dry-run','requests':1,'payload_bytes':len(json.dumps(payload).encode()),'rows':rows,'request':payload,
+                    'unjudged':{'reason':'dry-run','candidates':[f'l{i}' for i in range(len(rows))]}}
         else:
             key=os.environ.get('JEV_SEARCH_API_KEY','')
             if not key: raise ValueError('set JEV_SEARCH_API_KEY to an inference key for the selected provider; configure its spending limit')
             raw,latency=send_request(payload,key,args.provider); data=json.loads(raw)
             output={'mode':'sent','latency_seconds':latency,'results':validate_response(data,rows,args.provider,payload['model']),'raw_response':data}
+            if args.rank or args.top_k is not None:
+                # ponytail: rank existing scores only; answerability needs a separately validated experiment.
+                output['ranked_results']=sorted((r for r in output['results'] if r['match']),key=lambda r:-r['probability'])[:args.top_k]
         print(json.dumps(output,ensure_ascii=True,allow_nan=False))
         return 0
     except (ValueError,OSError) as e:
-        print(json.dumps({'error':str(e)},ensure_ascii=True),file=sys.stderr); return 1
+        # All-or-nothing validation: never salvage scores from a failed response.
+        unjudged={'reason':'evaluation-failed','candidates':None if rows is None else [f'l{i}' for i in range(len(rows))]}
+        print(json.dumps({'error':str(e),'unjudged':unjudged},ensure_ascii=True),file=sys.stderr); return 1
 
 if __name__=='__main__':
     raise SystemExit(main())
