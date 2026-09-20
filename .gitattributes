@@ -1,0 +1,2 @@
+# Preserve the exact bytes of the frozen benchmark across platforms.
+tests/fixtures/ranking.json text eol=lf

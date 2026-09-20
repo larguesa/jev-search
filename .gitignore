@@ -1,6 +1,7 @@
 # Deny by default. New public files must be deliberately allowlisted.
 /*
 !/.gitignore
+!/.gitattributes
 !/pyproject.toml
 !/MANIFEST.in
 !/LICENSE
