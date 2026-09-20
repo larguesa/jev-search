@@ -6,6 +6,7 @@
 !/MANIFEST.in
 !/LICENSE
 !/README.md
+!/agents.md
 !/jev_search.py
 !/tests/
 /tests/*
